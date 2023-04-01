@@ -1,0 +1,12 @@
+import random
+import pandas as pd
+
+random_numbers = []
+for i in range(10):
+    random_numbers.append(random.randint(0, 100))
+
+df = pd.DataFrame({'random_numbers': random_numbers})
+df.to_csv('random_numbers.csv', index=False)
+
+df_read = pd.read_csv('random_numbers.csv')
+print(df_read)
