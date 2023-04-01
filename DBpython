@@ -1,0 +1,42 @@
+import pandas as pd
+import psycopg2
+
+# Введення параметрів підключення до бази даних
+host = "localhost"
+port = "5432"
+dbname = "testdb"
+user = "user"
+password = "password"
+
+# Введення шляху до CSV файлу
+file_path = "data.csv"
+
+# Введення назви таблиці у базі даних
+table_name = "data_table"
+
+# Введення роздільника та формату введення-виведення даних
+delimiter = ","
+dtype = {"col1": str, "col2": float, "col3": int}
+
+# Завантаження даних з CSV файлу у об'єкт DataFrame
+df = pd.read_csv(file_path, delimiter=delimiter, dtype=dtype)
+
+# Підключення до бази даних та створення курсора
+conn = psycopg2.connect(host=host, port=port, dbname=dbname, user=user, password=password)
+cur = conn.cursor()
+
+# Перевірка наявності таблиці у базі даних та створення нової таблиці, якщо потрібно
+cur.execute("CREATE TABLE IF NOT EXISTS {} (col1 VARCHAR(255), col2 FLOAT, col3 INT)".format(table_name))
+conn.commit()
+
+# Збереження даних у відповідному форматі до таблиці бази даних
+for index, row in df.iterrows():
+    cur.execute("INSERT INTO {} (col1, col2, col3) VALUES (%s, %s, %s)".format(table_name), (row["col1"], row["col2"], row["col3"]))
+conn.commit()
+
+# Закриття курсора та з'єднання з базою даних
+cur.close()
+conn.close()
+
+# Повідомлення про успішне завантаження даних
+print("Дані успішно завантажено до таблиці {} у базі даних {}.".format(table_name, dbname))
