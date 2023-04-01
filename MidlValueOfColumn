@@ -1,0 +1,21 @@
+import psycopg2
+import pandas as pd
+
+# Підключення до бази даних
+conn = psycopg2.connect(
+    host="localhost",
+    database="mydatabase",
+    user="myuser",
+    password="mypassword"
+)
+
+# Отримання даних з бази даних
+query = "SELECT AVG(salary) FROM employees;"
+df = pd.read_sql_query(query, conn)
+
+# Збереження результату у файл
+df.to_csv('average_salary.csv', index=False)
+
+# Зчитування збережених даних та виведення на екран
+df_read = pd.read_csv('average_salary.csv')
+print(df_read)
