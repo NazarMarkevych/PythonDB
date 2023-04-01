@@ -1,0 +1,30 @@
+import csv
+import psycopg2
+
+# з'єднання з базою даних PostgreSQL
+conn = psycopg2.connect(database="mydb", user="myuser", password="mypassword", host="localhost", port="5432")
+
+# створення таблиці в базі даних
+cur = conn.cursor()
+cur.execute('''CREATE TABLE mytable
+               (id SERIAL PRIMARY KEY,
+                name TEXT,
+                age INT,
+                city TEXT);''')
+conn.commit()
+
+# завантаження даних з CSV файлу в базу даних
+with open('mydata.csv', 'r') as f:
+    reader = csv.reader(f)
+    next(reader) # пропускаємо заголовок
+    for row in reader:
+        cur.execute("INSERT INTO mytable (name, age, city) VALUES (%s, %s, %s);", row)
+    conn.commit()
+
+# очищення дублікатів даних
+cur.execute("DELETE FROM mytable a USING mytable b WHERE a.id < b.id AND a.name = b.name AND a.age = b.age AND a.city = b.city;")
+conn.commit()
+
+# закриття з'єднання з базою даних
+cur.close()
+conn.close()
